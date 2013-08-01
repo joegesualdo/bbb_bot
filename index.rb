@@ -28,9 +28,12 @@ end
 @company = Array.new
 @accredidation_date = Array.new
 @phone = Array.new
+@fax = Array.new
 @street_address = Array.new
 @email = Array.new
 @website = Array.new
+@rating = Array.new
+@complaints = Array.new
 @zip = Array.new
 @owner = Array.new
 @description = Array.new
@@ -68,9 +71,13 @@ links.each do |link|
 	@accredidation_date << accredidation_date
 	puts accredidation_date
 
+	fax = business_page.css("span.business-fax").text.sub(/Fax: /, '').strip
+	@fax << fax
+	puts fax
+
 	# Find the compnay phone number and push it into @phone number  array
 	# TODO: Strip prefix "Phone: "
-	phone = business_page.css("span.business-phone").text.strip
+	phone = business_page.css("span.business-phone").text.sub(/Phone: /, '').strip
 	@phone << phone
 	puts phone
 
@@ -84,6 +91,18 @@ links.each do |link|
 	website = business_page.css("span.business-link").text.strip
 	@website << website
 	puts website
+
+	# TODO: Strip trademark from results using REGEX
+	rating = business_page.css("div#accedited-rating img")[0]['title'].sub(/[^A\\+]*/, '').sub(/ Rating/,'').strip
+	@rating << rating
+	puts rating
+
+	complaints = business_page.css("table.complaint-table td")[1].text.strip
+	@complaints << complaints
+	puts complaints
+
+	founded = business_page.css("div#business-additional-info-text span")[1].text.strip
+	puts founded
 
 	# Find the compnay title and push it into @company name array
 	h5_tags = business_page.css("div#business-additional-info-text h5")
@@ -111,9 +130,9 @@ end
 # end	
 
 CSV.open("#{BUSINESS_TYPE_URL}-#{STATE_URL}.csv", "wb") do |row|
-  row << ["Companies Name", "Accredidation Date", "Phone Numbers", "Website", "Owner"]
+  row << ["Companies Name", "Accredidation Date", "Fax Number", "Phone Numbers", "Website", "Rating", "Compaints", "Owner"]
   (0..@company.length - 1).each do |index|
-    row << [@company[index], @accredidation_date[index], @phone[index], @website[index], @owner[index]]
+    row << [@company[index], @accredidation_date[index], @fax[index], @phone[index], @website[index], @rating[index], @complaints[index], @owner[index]]
   end
 end
 
